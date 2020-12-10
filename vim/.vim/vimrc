@@ -1,0 +1,147 @@
+let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
+let &t_SI.="\e[5 q" "SI = INSERT mode
+let &t_SR.="\e[4 q" "SR = REPLACE mode
+let &t_EI.="\e[1 q" "EI = NORMAL mode (ELSE)
+
+set viminfo+=n~/.history/viminfo
+set termguicolors
+set background=dark
+colorscheme solarized8
+set nocompatible
+set ttyfast
+set lazyredraw
+set noerrorbells
+
+set autoread
+au FocusGained,BufEnter * checktime
+
+scriptencoding utf-8
+set encoding=utf-8
+
+set shell=/bin/bash
+
+" :W saves the file when in readonly mode
+command W w !sudo tee % > /dev/null
+
+" Set line wrapping
+set wrap
+set linebreak
+
+" Set line numbering in hybrid mode
+set number relativenumber
+
+" Enable syntax highlighting
+syntax enable
+
+" Search
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+
+" Show matching brackets
+set showmatch
+
+set backspace=indent,eol,start
+
+" Add newlines without entering insert mode
+noremap <Enter> o<ESC>
+noremap <leader><Enter> O<ESC>
+
+" Indents
+set expandtab
+set tabstop=4 shiftwidth=4
+
+set smarttab
+set autoindent
+filetype plugin indent on
+autocmd BufRead,BufNewFile *.vue setfiletype html
+
+set history=1000
+set undofile                 "turn on the feature
+set undodir=$HOME/.history/vim  "directory where the undo files will be stored
+
+set path+=**
+
+set wildmenu
+set wildignore+=**/node_modules/**
+
+" Jump to next cursor placeholder from an expander
+nnoremap <leader><Tab> /<++><CR>"_c4l
+nnoremap <localleader><Tab> /<++><CR>"_c4l
+inoremap <localleader><Tab> <Esc>/<++><CR>"_c4l
+
+" Split navigation
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+
+" Highlight TODO
+augroup HiglightTodo
+    autocmd!
+    autocmd WinEnter,VimEnter * :silent! call matchadd('Todo', 'TODO', -1)
+    autocmd WinEnter,VimEnter * :silent! call matchadd('Todo', '@todo', -1)
+    autocmd WinEnter,VimEnter * :silent! call matchadd('Todo', 'todo!', -1)
+augroup END
+
+" Expanders
+autocmd FileType html,vue inoremap ;p <p>_</p><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;P <p><CR><Space><Space><Space><Space>_<CR></p><CR><CR><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;b <b>_</b><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;B <br />
+autocmd FileType html,vue inoremap ;i <i>_</i><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;a <a href="_"><++></a><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;d <div><CR><Space><Space><Space><Space>_<CR></div><CR><CR><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;1 <h1>_</h1><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;2 <h2>_</h2><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;3 <h3>_</h3><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;4 <h4>_</h4><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;5 <h5>_</h5><Space><++><Esc>?_<CR>"_s
+autocmd FileType html,vue inoremap ;6 <h6>_</h6><Space><++><Esc>?_<CR>"_s
+autocmd FileType javascript,vue inoremap ;c console.log(_);<CR><++><Esc>?_<CR>"_s Expanders
+
+autocmd FileType cpp inoremap ;f for(_; <++>; <++>)<++><Esc>?_<CR>"_s
+autocmd FileType cpp inoremap ;w while(_)<++><Esc>?_<CR>"_s
+autocmd FileType cpp inoremap {<CR> {<CR>}<Esc>ko
+
+" Some file specific shortcuts
+autocmd filetype cpp noremap <leader>t :noautocmd vimgrep /TODO/j **/*.cpp, **/*.h<cr>:cw<cr>
+
+" This function will check what kind of C/C++ project it is
+" Possibilities are: CMake or ESP32 projects for now
+" Return: 0 -> configure, 1 -> compile, 2 -> flash
+" Will return "not_set" when no compiler is available
+function! GetCppCompilers()
+    let cmake = 0
+    let makefile = 0
+    if filereadable("CMakeLists.txt")
+        let cmake = 1
+    endif
+    if filereadable("Makefile")
+        let makefile = 1
+    endif
+    if cmake && makefile 
+        return ["not_set", "esp32_build", "esp32_flash"]
+    else "if cmake && !makefile
+        return ["cmake", "make", "not_set"]
+    endif
+endfunction
+
+execute 'autocmd filetype cpp,c,h,hpp nnoremap <leader>c :noautocmd compiler ' . GetCppCompilers()[0] . '<cr>:make<cr>'
+execute 'autocmd filetype cpp,c,h,hpp nnoremap <leader>b :noautocmd compiler ' . GetCppCompilers()[1] . '<cr>:make<cr>'
+execute 'autocmd filetype cpp,c,h,hpp nnoremap <leader>f :noautocmd compiler ' . GetCppCompilers()[2] . '<cr>:make<cr>'
+
+nnoremap <leader>s :set spell! spelllang=nl,en_us<CR>
+call plug#begin('~/.vim/plugged')
+
+Plug 'psliwka/vim-smoothie'
+Plug 'ycm-core/YouCompleteMe'
+
+call plug#end()
+
+autocmd FileType cpp,c,h,hpp nnoremap <leader>gt :YcmCompleter GoTo <CR>
+
+let g:ycm_python_binary_path = 'python'

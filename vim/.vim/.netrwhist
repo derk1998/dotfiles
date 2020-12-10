@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =6
+let g:netrw_dirhist_6='/home/derk/development/msi-smart-connection-derk1998/portfolio/src'
+let g:netrw_dirhist_5='/home/derk/development/msi-smart-connection-derk1998/portfolio/src/components'
+let g:netrw_dirhist_4='/home/derk/development/msi-smart-connection-derk1998/portfolio/src'
+let g:netrw_dirhist_3='/home/derk/development/msi-smart-connection-derk1998/portfolio'
+let g:netrw_dirhist_2='/home/derk/development/msi-smart-connection-derk1998'
+let g:netrw_dirhist_1='/home/derk/development'
+let g:netrw_dirhist_0='/home/derk/development/msi-smart-connection-salverho'
+let g:netrw_dirhist_9='/home/derk/development/msi-smart-connection-salverho/portfolio'
+let g:netrw_dirhist_8='/home/derk/development/st'
+let g:netrw_dirhist_7='/home/derk/development'
